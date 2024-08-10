@@ -1,10 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:sqflite/utils/utils.dart';
-import 'package:user_info/services/database_service.dart';
 import 'package:user_info/models/user_model.dart';
-import 'package:flutter/foundation.dart';
+import 'package:user_info/services/database_service.dart';
 
 class UserProvider with ChangeNotifier {
   final DatabaseService _databaseService = DatabaseService();
@@ -14,7 +10,6 @@ class UserProvider with ChangeNotifier {
   int _pageNo = 0;
   int _limit = 10;
   int _totalPages = 0;
-  // bool _noMorePagesAvailable = false;
   UserModel? _selectedUser;
   String _searchQuery = '';
 
@@ -29,19 +24,25 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<void> _loadUsers() async {
-    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
     try {
       List<Map<String, dynamic>> userMaps;
-      getCount();
+      await getCount();
       if (_searchQuery.isEmpty) {
         userMaps = await _databaseService.getUsers(limit: _limit, offset: _pageNo * _limit);
       } else {
         userMaps = await _databaseService.searchUsers(_searchQuery);
       }
       _users = userMaps.map((map) => UserModel.fromJson(map)).toList();
+      if (_users.isEmpty) {
+        if (_pageNo > 0) {
+          _pageNo--;
+          await _loadUsers();
+          notifyListeners();
+        }
+      }
     } catch (e) {
       print('Error getting user List: $e');
     } finally {
@@ -59,13 +60,13 @@ class UserProvider with ChangeNotifier {
 
   Future<void> addUser(UserModel user) async {
     await _databaseService.insertUser(user.toJson());
-    _loadUsers();
+    await _loadUsers();
     notifyListeners();
   }
 
   Future<void> updateUser(UserModel user) async {
     await _databaseService.updateUser(user.id!, user.toJson());
-    _loadUsers();
+    await _loadUsers();
     _selectedUser = user;
     notifyListeners();
   }
@@ -73,7 +74,7 @@ class UserProvider with ChangeNotifier {
   Future<void> deleteUser(int id) async {
     try {
       await _databaseService.deleteUser(id);
-      _loadUsers();
+      await _loadUsers();
       notifyListeners();
     } catch (e) {
       print('Error deleting user: $e');
@@ -91,7 +92,7 @@ class UserProvider with ChangeNotifier {
 
   Future<void> loadPreviousPage() async {
     if (_isLoading) return;
-    if (_pageNo != 0) {
+    if (_pageNo > 0) {
       _pageNo--;
       await _loadUsers();
     }

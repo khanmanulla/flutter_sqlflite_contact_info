@@ -121,8 +121,7 @@ class _UserListScreenState extends State<UserListScreen> {
                               leading: CircleAvatar(
                                   backgroundColor: ColorPalate.getRandomColor(),
                                   radius: 25,
-                                  child: Text("${user.firstName?[0].toUpperCase()} ${user.lastName?[0].toUpperCase()}",
-                                      style: FormStyles.white20TextStyle())),
+                                  child: Text("${user.firstName?[0].toUpperCase()} ${user.lastName?[0].toUpperCase()}", style: FormStyles.white20TextStyle())),
                               title: Text("${user.firstName}  ${user.lastName}", style: FormStyles.black16TextStyles()),
                               subtitle: Text("${user.mobile}", style: FormStyles.grey14TextStyle()),
                               trailing: IconButton(
@@ -137,10 +136,10 @@ class _UserListScreenState extends State<UserListScreen> {
                                       cancelButtonColor: ColorPalate.grey,
                                     );
 
-                                    userProvider.deleteUser(user.id ?? 0);
-                                    userProvider.refreshUsers();
-                                    SnackBarHelper.showSuccessSnackBar(
-                                        context, "${user.firstName} ${user.lastName} removed");
+                                    setState(() {
+                                      userProvider.deleteUser(user.id ?? 0);
+                                      SnackBarHelper.showSuccessSnackBar(context, "${user.firstName} ${user.lastName} removed");
+                                    });
                                   },
                                   icon: Icon(Icons.delete, color: ColorPalate.red)),
                             )));
@@ -160,17 +159,30 @@ class _UserListScreenState extends State<UserListScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
-                    onPressed: () => _previousPage(context),
+                    onPressed: () {
+                      if ((userProvider.pageNo == 0) || userProvider.isLoading) {
+                        return;
+                      } else {
+                        _previousPage(context);
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
+                      foregroundColor: (userProvider.pageNo == 0) || userProvider.isLoading ? ColorPalate.grey : null,
                       backgroundColor: userProvider.isLoading ? ColorPalate.lightGrey : null,
                     ),
                     child: const Text('Previous'),
                   ),
-                  Text('Page ${userProvider.pageNo + 1}', style: const TextStyle(fontSize: FontSize.medium)),
+                  Text('Page ${userProvider.pageNo + 1} of ${userProvider.totalPages}', style: const TextStyle(fontSize: FontSize.medium)),
                   ElevatedButton(
-                    onPressed: () => _nextPage(context),
+                    onPressed: () {
+                      if ((userProvider.pageNo + 1 == userProvider.totalPages) || userProvider.isLoading) {
+                        return;
+                      } else {}
+                      _nextPage(context);
+                    },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: userProvider.isLoading ? ColorPalate.lightGrey : null,
+                      foregroundColor: (userProvider.pageNo + 1 == userProvider.totalPages) || userProvider.isLoading ? ColorPalate.grey : null,
+                      backgroundColor: (userProvider.pageNo + 1 == userProvider.totalPages) || userProvider.isLoading ? ColorPalate.lightGrey : null,
                     ),
                     child: const Text('Next'),
                   ),
