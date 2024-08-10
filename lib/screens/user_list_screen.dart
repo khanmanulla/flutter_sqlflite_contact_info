@@ -125,23 +125,27 @@ class _UserListScreenState extends State<UserListScreen> {
                               title: Text("${user.firstName}  ${user.lastName}", style: FormStyles.black16TextStyles()),
                               subtitle: Text("${user.mobile}", style: FormStyles.grey14TextStyle()),
                               trailing: IconButton(
-                                  onPressed: () async {
-                                    await showCustomAlertDialog(
-                                      context,
-                                      title: 'Confirm Delete',
-                                      message: 'Are you sure you want to delete ${user.firstName} ${user.lastName}?',
-                                      confirmButtonText: 'Yes',
-                                      cancelButtonText: 'No',
-                                      confirmButtonColor: ColorPalate.red,
-                                      cancelButtonColor: ColorPalate.grey,
-                                    );
+                                onPressed: () async {
+                                  bool? isConfirmed = await showCustomAlertDialog(
+                                    context,
+                                    title: 'Confirm Delete',
+                                    message: 'Are you sure you want to delete ${user.firstName} ${user.lastName}?',
+                                    confirmButtonText: 'Yes',
+                                    cancelButtonText: 'No',
+                                    confirmButtonColor: ColorPalate.red,
+                                    cancelButtonColor: ColorPalate.grey,
+                                  );
 
+                                  // Check if the user confirmed the deletion
+                                  if (isConfirmed == true) {
                                     setState(() {
                                       userProvider.deleteUser(user.id ?? 0);
                                       SnackBarHelper.showSuccessSnackBar(context, "${user.firstName} ${user.lastName} removed");
                                     });
-                                  },
-                                  icon: Icon(Icons.delete, color: ColorPalate.red)),
+                                  }
+                                },
+                                icon: Icon(Icons.delete, color: ColorPalate.red),
+                              ),
                             )));
                   }),
             );
