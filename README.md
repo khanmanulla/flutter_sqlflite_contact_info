@@ -17,10 +17,10 @@ This is a Flutter application designed for managing user information with CRUD (
 
 ## Clone the Repository
 ```bash
-git clone https://github.com/yourusername/user_info.git 
+git clone https://github.com/khanmanulla/flutter_sqlflite_contact_info.git 
 
 # Navigate to the directory
-cd user_info
+cd flutter_sqlflite_contact_info
 ```
 
 ## Install Dependencies
